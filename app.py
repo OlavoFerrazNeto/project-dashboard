@@ -13,3 +13,6 @@ sel_ano = st.radio(
 )
 
 st.write("Você selecionou:",sel_ano)
+
+
+print("olavo")
