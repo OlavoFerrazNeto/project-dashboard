@@ -37,3 +37,19 @@ d = st.date_input(
     format="MM.DD.YYYY"
 )
 
+st.write("As datas escolhidas foram:",d)
+
+data1 = d[0]
+data2 = d[1]
+
+# Convertendo para o formato YYYY-MM-DD
+start_date = data1.strftime('%Y-%m-%d')
+end_date = data2.strftime('%Y-%m-%d')
+
+
+df['REPORT_DATE'] = pd.to_datetime(df['REPORT_DATE'])
+
+filtered_df = df[(df['REPORT_DATE'] >= start_date) & (df['REPORT_DATE'] <= end_date)]
+
+
+st.write(filtered_df.head())
