@@ -77,23 +77,29 @@ sel_category = st.sidebar.selectbox(
 )
 
 # Gráficos Interativos
+# Gráfico de Linha com Ajuste de Tamanho e Layout
 st.write("### Gráfico de Linha - Evolução da Categoria Selecionada")
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(10, 6))
 sns.lineplot(data=filtered_df, x='DATA_REPORTE', y=sel_category, ax=ax)
+plt.tight_layout()
 st.pyplot(fig)
 
-st.write("### Gráfico de Barras - Distribuição da Categoria Selecionada")
-fig, ax = plt.subplots()
-sns.histplot(data=filtered_df, x=sel_category, kde=False, ax=ax)
+# Gráfico de Barras com Filtro das Top 10 Categorias e Rotação de Rótulos
+top_categories = filtered_df[sel_category].value_counts().nlargest(10).index
+filtered_top_df = filtered_df[filtered_df[sel_category].isin(top_categories)]
+
+st.write(f"### Gráfico de Barras - Top 10 {sel_category}")
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.countplot(data=filtered_top_df, y=sel_category, ax=ax)
+plt.xticks(rotation=90)
+plt.tight_layout()
 st.pyplot(fig)
 
+# Gráfico de Dispersão para Analisar Correlação entre Duas Categorias
 st.write("### Gráfico de Dispersão - Correlação de Categorias")
-sel_category2 = st.sidebar.selectbox(
-    "Selecione uma segunda categoria para correlação:",
-    options=df.columns[1:]
-)
-fig, ax = plt.subplots()
-sns.scatterplot(data=filtered_df, x=sel_category, y=sel_category2, ax=ax)
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.scatterplot(data=filtered_df, x='DATA_REPORTE', y=sel_category, ax=ax)
+plt.tight_layout()
 st.pyplot(fig)
 
 # Adicionando uma imagem fixa
