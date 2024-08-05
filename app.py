@@ -76,19 +76,14 @@ df = df.rename(
 )
 
 df["DATA_REPORTE"] = pd.to_datetime(df["DATA_REPORTE"])
-
 filtered_df = df[(df["DATA_REPORTE"] >= start_date) & (df["DATA_REPORTE"] <= end_date)]
-# Seleção de categoria para análise
-sel_category = st.sidebar.selectbox(
-    "Selecione uma categoria para análise:", options=df.columns[1:]
-)
+
 # Seleção de condados
 unique_counties = df["NOME_CONDADO"].unique()
 selected_counties = st.sidebar.multiselect(
     label="Selecione os condados para análise:",
     options=unique_counties.tolist(),
     default=None,
-    placeholder=""
 )
 
 # Filtra o DataFrame com base na seleção dos condados
@@ -97,49 +92,60 @@ if selected_counties:
 else:
     st.warning("Por favor, selecione pelo menos um condado para análise.")
 
+# Seleção de eixo X para os gráficos (Data ou Condado)
+x_axis_option = st.sidebar.selectbox(
+    label="Selecione o eixo X:",
+    options=["DATA_REPORTE", "NOME_CONDADO"],
+    index=0
+)
+
 # Geração dos gráficos com base na seleção dos condados e categorias
 if not filtered_df.empty:
-    st.write("### Gráfico de Linha - Evolução de Casos Positivos Totais")
-    fig = px.line(
+    st.write("### Gráfico de Linha - Evolução de Casos Positivos Totais X Condado")
+    fig = px.bar(
         filtered_df,
-        x="MORTES_TOTAL",
+        x=x_axis_option,
         y="CASOS_POSITIVOS_TOTAL",
+        color="NOME_CONDADO",
         title="Evolução dos Casos Positivos Totais",
-        labels={"MORTES_TOTAL": "Mortes Totais", "CASOS_POSITIVOS_TOTAL": "Casos Positivos Totais"},
-        
+        labels={x_axis_option: "Cidades ou Data", "CASOS_POSITIVOS_TOTAL": "Casos Positivos Totais"},
+        barmode='group'
     )
     st.plotly_chart(fig)
 
     st.write("### Gráfico de Linha - Evolução de Novos Casos Positivos")
-    fig = px.line(
+    fig = px.bar(
         filtered_df,
-        x="DATA_REPORTE",
+        x=x_axis_option,
         y="NOVOS_CASOS_POSITIVOS",
+        color="NOME_CONDADO",
         title="Evolução dos Novos Casos Positivos",
-        labels={"DATA_REPORTE": "Data", "NOVOS_CASOS_POSITIVOS": "Novos Casos Positivos"},
-        
+        labels={x_axis_option: "Cidades ou Data", "NOVOS_CASOS_POSITIVOS": "Novos Casos Positivos"},
+        barmode='group'
     )
     st.plotly_chart(fig)
 
     st.write("### Gráfico de Linha - Evolução de Mortes Totais")
-    fig = px.line(
+    fig = px.bar(
         filtered_df,
-        x="DATA_REPORTE",
+        x=x_axis_option,
         y="MORTES_TOTAL",
+        color="NOME_CONDADO",
         title="Evolução das Mortes Totais",
-        labels={"DATA_REPORTE": "Data", "MORTES_TOTAL": "Mortes Totais"},
-        
+        labels={x_axis_option: "Cidades ou Data", "MORTES_TOTAL": "Mortes Totais"},
+        barmode='group'
     )
     st.plotly_chart(fig)
 
     st.write("### Gráfico de Linha - Evolução de Novas Mortes")
-    fig = px.line(
+    fig = px.bar(
         filtered_df,
-        x="DATA_REPORTE",
+        x=x_axis_option,
         y="NOVAS_MORTES",
+        color="NOME_CONDADO",
         title="Evolução das Novas Mortes",
-        labels={"DATA_REPORTE": "Data", "NOVAS MORTES": "Novas Mortes"},
-        
+        labels={x_axis_option: "Cidades ou Data", "NOVAS_MORTES": "Novas Mortes"},
+        barmode='group'
     )
     st.plotly_chart(fig)
 
