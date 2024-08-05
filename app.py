@@ -78,12 +78,10 @@ df = df.rename(
 df["DATA_REPORTE"] = pd.to_datetime(df["DATA_REPORTE"])
 
 filtered_df = df[(df["DATA_REPORTE"] >= start_date) & (df["DATA_REPORTE"] <= end_date)]
-
 # Seleção de categoria para análise
 sel_category = st.sidebar.selectbox(
     "Selecione uma categoria para análise:", options=df.columns[1:]
 )
-
 # Seleção de condados
 unique_counties = df["NOME_CONDADO"].unique()
 selected_counties = st.sidebar.multiselect(
@@ -93,46 +91,60 @@ selected_counties = st.sidebar.multiselect(
     placeholder=""
 )
 
+# Filtra o DataFrame com base na seleção dos condados
 if selected_counties:
     filtered_df = filtered_df[filtered_df["NOME_CONDADO"].isin(selected_counties)]
 else:
     st.warning("Por favor, selecione pelo menos um condado para análise.")
 
-
-# Gráficos Interativos
-st.write("### Gráfico de Linha - Evolução da Categoria Selecionada")
-fig = px.line(
-    filtered_df,
-    x="DATA_REPORTE",
-    y=sel_category,
-    title=f"Evolução da {sel_category}",
-    labels={"DATA_REPORTE": "Data", sel_category: "Valores"},
-    hover_data=[sel_category],
-)
-
-st.plotly_chart(fig)
-
-# Verifica se o DataFrame filtrado não está vazio antes de tentar plotar
+# Geração dos gráficos com base na seleção dos condados e categorias
 if not filtered_df.empty:
-    st.write("### Gráfico de Barras Interativo")
-    fig, ax = plt.subplots(figsize=(10, 6))
-    top_categories = filtered_df[sel_category].value_counts().nlargest(10).index
-    filtered_top_df = filtered_df[filtered_df[sel_category].isin(top_categories)]
-    if not filtered_top_df.empty:
-        sns.countplot(data=filtered_top_df, y=sel_category, ax=ax)
-        plt.xticks(rotation=90)
-        plt.tight_layout()
-        st.pyplot(fig)
-    else:
-        st.warning("Não há dados suficientes para exibir o gráfico de barras.")
+    st.write("### Gráfico de Linha - Evolução de Casos Positivos Totais")
+    fig = px.line(
+        filtered_df,
+        x="MORTES_TOTAL",
+        y="CASOS_POSITIVOS_TOTAL",
+        title="Evolução dos Casos Positivos Totais",
+        labels={"MORTES_TOTAL": "Mortes Totais", "CASOS_POSITIVOS_TOTAL": "Casos Positivos Totais"},
+        
+    )
+    st.plotly_chart(fig)
+
+    st.write("### Gráfico de Linha - Evolução de Novos Casos Positivos")
+    fig = px.line(
+        filtered_df,
+        x="DATA_REPORTE",
+        y="NOVOS_CASOS_POSITIVOS",
+        title="Evolução dos Novos Casos Positivos",
+        labels={"DATA_REPORTE": "Data", "NOVOS_CASOS_POSITIVOS": "Novos Casos Positivos"},
+        
+    )
+    st.plotly_chart(fig)
+
+    st.write("### Gráfico de Linha - Evolução de Mortes Totais")
+    fig = px.line(
+        filtered_df,
+        x="DATA_REPORTE",
+        y="MORTES_TOTAL",
+        title="Evolução das Mortes Totais",
+        labels={"DATA_REPORTE": "Data", "MORTES_TOTAL": "Mortes Totais"},
+        
+    )
+    st.plotly_chart(fig)
+
+    st.write("### Gráfico de Linha - Evolução de Novas Mortes")
+    fig = px.line(
+        filtered_df,
+        x="DATA_REPORTE",
+        y="NOVAS_MORTES",
+        title="Evolução das Novas Mortes",
+        labels={"DATA_REPORTE": "Data", "NOVAS MORTES": "Novas Mortes"},
+        
+    )
+    st.plotly_chart(fig)
+
 else:
     st.warning("Não há dados suficientes para exibir os gráficos.")
-
-st.write("### Gráfico de Dispersão - Correlação de Categorias")
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.scatterplot(data=filtered_df, x="DATA_REPORTE", y=sel_category, ax=ax)
-plt.tight_layout()
-st.pyplot(fig)
 
 # Exibindo o DataFrame filtrado
 st.write("### Dados Filtrados")
