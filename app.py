@@ -6,9 +6,14 @@ import seaborn as sns
 import plotly.express as px
 import zipfile
 
-st.title("COVID-19 Dashboard")
-st.markdown("### Objetivo do Dash: Análise interativa dos dados de COVID-19")
+# Carregando a imagem do repositório
+image_path = "cases_percap.png"
+st.image(image_path, use_column_width=True)
 
+st.title("COVID-19 Dashboard")
+st.markdown(
+    "### Objetivo do Dash: Análise interativa dos dados de COVID-19\nAlunos: Olavo Ferraz(ofn@cesar.school) e Victor Silva(vrss@cesar.school)"
+)
 
 zip_path = "COVID-19 Activity.zip"
 # Caminho para o arquivo zipado
@@ -18,7 +23,6 @@ zip_path = "COVID-19 Activity.zip"
 with zipfile.ZipFile(zip_path, "r") as z:
     with z.open("COVID-19 Activity.csv") as f:
         df = pd.read_csv(f, low_memory=False, dtype=str)
-
 
 df = df.dropna()
 
@@ -34,7 +38,7 @@ dec_31 = datetime.date(sel_ano, 12, 31)
 
 d = st.date_input(
     "Selecione as datas para análise:",
-    (jan_1, datetime.date(sel_ano, 1, 7)),
+    (jan_1, datetime.date(sel_ano, 12, 31)),
     jan_1,
     dec_31,
     format="MM.DD.YYYY",
@@ -86,6 +90,7 @@ selected_counties = st.sidebar.multiselect(
     label="Selecione os condados para análise:",
     options=unique_counties.tolist(),
     default=None,
+    placeholder=""
 )
 
 if selected_counties:
@@ -96,7 +101,6 @@ else:
 
 # Gráficos Interativos
 st.write("### Gráfico de Linha - Evolução da Categoria Selecionada")
-st.write("### Gráfico de Linha Interativo - Evolução da Categoria Selecionada")
 fig = px.line(
     filtered_df,
     x="DATA_REPORTE",
@@ -108,21 +112,27 @@ fig = px.line(
 
 st.plotly_chart(fig)
 
-st.write("### Gráfico de Barras Interativo")
-fig, ax = plt.subplots(figsize=(10, 6))
-top_categories = filtered_df[sel_category].value_counts().nlargest(10).index
-filtered_top_df = filtered_df[filtered_df[sel_category].isin(top_categories)]
-sns.countplot(data=filtered_top_df, y=sel_category, ax=ax)
-plt.xticks(rotation=90)
-plt.tight_layout()
-st.pyplot(fig)
+# Verifica se o DataFrame filtrado não está vazio antes de tentar plotar
+if not filtered_df.empty:
+    st.write("### Gráfico de Barras Interativo")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    top_categories = filtered_df[sel_category].value_counts().nlargest(10).index
+    filtered_top_df = filtered_df[filtered_df[sel_category].isin(top_categories)]
+    if not filtered_top_df.empty:
+        sns.countplot(data=filtered_top_df, y=sel_category, ax=ax)
+        plt.xticks(rotation=90)
+        plt.tight_layout()
+        st.pyplot(fig)
+    else:
+        st.warning("Não há dados suficientes para exibir o gráfico de barras.")
+else:
+    st.warning("Não há dados suficientes para exibir os gráficos.")
 
 st.write("### Gráfico de Dispersão - Correlação de Categorias")
 fig, ax = plt.subplots(figsize=(10, 6))
 sns.scatterplot(data=filtered_df, x="DATA_REPORTE", y=sel_category, ax=ax)
 plt.tight_layout()
 st.pyplot(fig)
-
 
 # Exibindo o DataFrame filtrado
 st.write("### Dados Filtrados")
